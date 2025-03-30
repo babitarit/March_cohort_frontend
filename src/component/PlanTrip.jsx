@@ -140,7 +140,7 @@ export default function PlanTrip() {
 
       <div className="relative w-full h-96 mb-10">
         <img
-          src="/src/assets/banner.jpg"
+          src="https://res.cloudinary.com/dafdencvh/image/upload/v1743323791/focaydrgtvwqvff0sxjn.webp"
           alt="Travel"
           className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg"
         />
