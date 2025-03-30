@@ -117,7 +117,7 @@ export default function PlanTrip() {
     console.log('Submitting:', payload);
 
     try {
-        const { data } = await axios.post('http://127.0.0.1:5000/generate_itinerary', payload);
+        const { data } = await axios.post('https://march-cohort-backend.onrender.com/generate_itinerary', payload);
         navigate("/itinerary", {
             state: { ...formData, itinerary: data.itinerary_text, pdfPath: data.pdf_path },
         });

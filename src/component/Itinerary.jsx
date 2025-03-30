@@ -151,7 +151,7 @@ export default function Itinerary() {
         <div className="flex flex-col gap-3 mt-6">
           {pdfPath && (
             <a
-              href={`http://localhost:5000/download_pdf`}
+              href={`https://march-cohort-backend.onrender.com/download_pdf`}
               download
               className="block text-center bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
             >
