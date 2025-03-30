@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -18,9 +17,10 @@ export default function PlanTrip() {
   const [formData, setFormData] = useState({
     source: "",
     destination: "",
-    duration: "",
+    startDate: "",
+    endDate: "",
     budget: "",
-    tripPurpose: "",
+    tripType: "Solo",
     preferences: "",
   });
 
@@ -84,26 +84,58 @@ export default function PlanTrip() {
     setReview(reviewsData[formData.destination] || "No reviews available for this location.");
   }, [formData.destination, reviewsData]);
 
+
+
+
+  const formatDateForBackend = (dateString) => {
+    const [year, month, day] = dateString.split('-');
+    return `${day}-${month}-${year}`;
+};
+
+
+
+
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.startDate || !formData.endDate) {
+        alert('Please select both start and end dates.');
+        return;
+    }
+
     setLoading(true);
 
+    const payload = {
+        ...formData,
+        startDate: formatDateForBackend(formData.startDate),
+        endDate: formatDateForBackend(formData.endDate),
+    };
+
+    console.log('Submitting:', payload);
+
     try {
-      const { data } = await axios.post('https://back-wqqi.onrender.com/generate_itinerary', formData);
-      navigate("/itinerary", {
-        state: { ...formData, itinerary: data.itinerary_text, pdfPath: data.pdf_path },
-      });
+        const { data } = await axios.post('http://127.0.0.1:5000/generate_itinerary', payload);
+        navigate("/itinerary", {
+            state: { ...formData, itinerary: data.itinerary_text, pdfPath: data.pdf_path },
+        });
     } catch (error) {
-      alert("Failed to connect to backend.");
+        alert("Failed to connect to backend.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
+
+
+
 
   return (
     <div className="min-h-screen bg-purple-50 p-8">
       <h1 className="text-3xl font-bold text-purple-800 text-center mb-6 transition-transform duration-500 hover:scale-105">
-        AI-powered Travel Itinerary Planner
+       Om Tours and Travels: Itinero 
       </h1>
 
       <div className="relative w-full h-96 mb-10">
@@ -115,8 +147,9 @@ export default function PlanTrip() {
       </div>
 
       
-<div className="flex flex-col lg:flex-row items-center justify-center gap-10">
 
+
+<div className="flex flex-col lg:flex-row items-center justify-center gap-10">
 <div className="lg:w-1/2 text-gray-700 text-lg p-6 bg-white rounded-lg shadow-lg transition-opacity duration-700 hover:opacity-90">
   <h2 className="text-2xl font-bold text-purple-800 mb-4">Your Personalized Travel Guide</h2>
   <p className="leading-relaxed mb-3">
@@ -136,28 +169,55 @@ export default function PlanTrip() {
 </div>
 
 
-
-
-
-        <div className="bg-white shadow-lg rounded-2xl p-8 w-full lg:w-1/3 hover:shadow-2xl transition-transform duration-500 hover:scale-105">
+<div className="bg-white shadow-lg rounded-2xl p-8 w-full lg:w-1/3 hover:shadow-2xl transition-transform duration-500 hover:scale-105">
           <h2 className="text-xl font-bold text-purple-800 mb-4">Plan Your Perfect Trip</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {Object.keys(formData).map((field, index) => (
-              <input
-                key={index}
-                type="text"
-                name={field}
-                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                value={formData[field]}
-                onChange={handleChange}
-                required
-                className="w-full p-2 border rounded-lg focus:border-purple-500 focus:ring-purple-300"
-              />
+              field !== "tripType" ? (
+                field === "startDate" || field === "endDate" ? (
+                  <input
+                    key={index}
+                    type="date"
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-2 border rounded-lg focus:border-purple-500 focus:ring-purple-300"
+                  />
+                ) : (
+                  <input
+                    key={index}
+                    type="text"
+                    name={field}
+                    placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-2 border rounded-lg focus:border-purple-500 focus:ring-purple-300"
+                  />
+                )
+              ) : (
+                <select
+                  key={index}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-lg focus:border-purple-500 focus:ring-purple-300"
+                >
+                  <option value="Solo">Solo</option>
+                  <option value="Family">Family</option>
+                  <option value="Friends">Friends</option>
+                  <option value="Business">Business</option>
+                </select>
+              )
             ))}
             <button type="submit" className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
               {loading ? "Generating..." : "Generate Itinerary"}
             </button>
           </form>
+
+
+
         </div>
       </div>
 
@@ -195,158 +255,3 @@ export default function PlanTrip() {
 
 
 
-// import { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-// import L from "leaflet";
-// import "leaflet/dist/leaflet.css";
-
-// const customIcon = new L.Icon({
-//   iconUrl: "https://cdn-icons-png.flaticon.com/512/252/252025.png",
-//   iconSize: [40, 40],
-//   iconAnchor: [20, 40],
-//   popupAnchor: [0, -35],
-// });
-
-// export default function PlanTrip() {
-//   const navigate = useNavigate();
-//   const [formData, setFormData] = useState({
-//     source: "",
-//     destination: "",
-//     duration: "",
-//     budget: "",
-//     tripPurpose: "",
-//     preferences: "",
-//   });
-
-//   const [loading, setLoading] = useState(false);
-//   const [coordinates, setCoordinates] = useState(null);
-//   const [weather, setWeather] = useState(null);
-//   const [review, setReview] = useState("");
-//   const [reviewsData, setReviewsData] = useState({});
-
-//   useEffect(() => {
-//     const fetchReviews = async () => {
-//       try {
-//         const response = await fetch("/reviews.json");
-//         const data = await response.json();
-//         setReviewsData(data);
-//       } catch (error) {
-//         console.error("Error fetching reviews:", error);
-//       }
-//     };
-//     fetchReviews();
-//   }, []);
-
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   useEffect(() => {
-//     const fetchLocationData = async () => {
-//       if (!formData.destination) return;
-//       try {
-//         const { data } = await axios.get(
-//           `https://nominatim.openstreetmap.org/search?format=json&q=${formData.destination}`
-//         );
-//         if (data.length > 0) {
-//           const lat = data[0].lat;
-//           const lon = data[0].lon;
-//           setCoordinates({ lat, lon });
-
-//           const weatherRes = await axios.get(
-//             `https://api.openweathermap.org/data/2.5/weather`,
-//             {
-//               params: {
-//                 lat,
-//                 lon,
-//                 units: "metric",
-//                 appid: "85a1d7f89447acc9ba8139b3302eb562",
-//               },
-//             }
-//           );
-//           setWeather({
-//             temperature: weatherRes.data.main.temp,
-//             description: weatherRes.data.weather[0].description,
-//           });
-//         }
-//       } catch (error) {
-//         console.error("Error fetching location data:", error);
-//       }
-//     };
-
-//     fetchLocationData();
-//     setReview(reviewsData[formData.destination] || "No reviews available for this location.");
-//   }, [formData.destination, reviewsData]);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       const { data } = await axios.post("http://localhost:5000/generate_itinerary", formData);
-//       navigate("/itinerary", {
-//         state: { ...formData, itinerary: data.itinerary_text, pdfPath: data.pdf_path },
-//       });
-//     } catch (error) {
-//       alert("Failed to connect to backend.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-purple-50 p-8 text-gray-800">
-//       <h1 className="text-5xl font-extrabold text-purple-800 text-center mb-6">AI-powered Travel Itinerary Planner</h1>
-      
-//       <p className="text-center text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-//         Plan your perfect trip effortlessly with our AI-powered planner. Get personalized recommendations based on your budget, duration, and preferences!
-//       </p>
-      
-//       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-8 space-y-4">
-//         {Object.keys(formData).map((field, index) => (
-//           <input
-//             key={index}
-//             type="text"
-//             name={field}
-//             placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-//             value={formData[field]}
-//             onChange={handleChange}
-//             required
-//             className="w-full p-2 border-b-2 border-purple-500 focus:outline-none focus:ring-0 text-lg"
-//           />
-//         ))}
-//         <button type="submit" className="w-full bg-purple-600 text-white py-3 text-lg font-semibold rounded-lg hover:bg-purple-700 transition">
-//           {loading ? "Generating..." : "Generate Itinerary"}
-//         </button>
-//       </form>
-
-//       {formData.destination && (
-//         <div className="mt-10 text-center">
-//           <h2 className="text-3xl font-bold text-purple-800">Destination Details</h2>
-//           <p className="text-gray-700 text-lg mt-2">Weather in {formData.destination}: {weather?.temperature}°C, {weather?.description}</p>
-//           <p className="text-gray-600 italic mt-2">{review}</p>
-//         </div>
-//       )}
-
-//       {coordinates && (
-//         <div className="mt-10">
-//           <h2 className="text-3xl font-bold text-purple-800 text-center mb-4">Destination Map</h2>
-//           <MapContainer center={[coordinates.lat, coordinates.lon]} zoom={13} className="w-full h-96 rounded-lg shadow-lg">
-//             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-//             <Marker position={[coordinates.lat, coordinates.lon]} icon={customIcon}>
-//               <Popup>
-//                 <strong>{formData.destination}</strong>
-//               </Popup>
-//             </Marker>
-//           </MapContainer>
-//         </div>
-//       )}
-      
-//       <footer className="mt-10 text-center text-purple-800 text-lg font-semibold">
-//         &copy; 2025 AI Travel Planner. All rights reserved.
-//       </footer>
-//     </div>
-//   );
-// }

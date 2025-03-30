@@ -10,7 +10,7 @@ export default function Itinerary() {
   const [hotels, setHotels] = useState([]);
   const [showMoreHotels, setShowMoreHotels] = useState(false);
 
-  // Parsing itinerary into day-wise format
+
   const daywiseItinerary = itinerary
     ? itinerary.split(/(Day \d+:)/).reduce((acc, item, index, arr) => {
         if (item.match(/Day \d+:/)) {
@@ -20,13 +20,13 @@ export default function Itinerary() {
       }, [])
     : [];
 
-  // Fetch hotels near the destination
+  
   useEffect(() => {
     const fetchHotels = async () => {
       if (!destination) return;
 
       try {
-        // Get coordinates for the destination
+        
         const geoResponse = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${destination}`
         );
@@ -39,7 +39,7 @@ export default function Itinerary() {
 
         const { lat, lon } = geoData[0];
 
-        // Fetch hotels near the destination using Overpass API
+        
         const overpassQuery = `
           [out:json];
           (
@@ -57,8 +57,9 @@ export default function Itinerary() {
         const hotelList = hotelData.elements.map((element) => ({
           name: element.tags.name || "Unnamed Hotel",
           address: element.tags["addr:street"] || "Address not available",
-          rating: (Math.random() * 2 + 3).toFixed(1), // Random rating between 3.0 to 5.0
-          image: `https://source.unsplash.com/200x150/?hotel,${destination}`, // Random hotel image from Unsplash
+          rating: (Math.random() * 2 + 3).toFixed(1), 
+          
+          image:'https://res.cloudinary.com/dafdencvh/image/upload/v1743315392/tagckawes9yy0h2ohtdr.jpg',
         }));
 
         setHotels(hotelList);
@@ -83,10 +84,10 @@ export default function Itinerary() {
           <p><strong>Preferences:</strong> {preferences || "None specified"}</p>
         </div>
 
-        {/* Hotels Recommendation Section */}
+        
         <h3 className="text-xl font-bold text-purple-700 mb-4">Recommended Hotels in {destination}</h3>
 
-        {/* Show first 4 hotels in horizontal layout */}
+        
         <div className="flex flex-wrap justify-center gap-4">
           {hotels.slice(0, 4).map((hotel, index) => (
             <div key={index} className="bg-purple-100 p-4 rounded-lg shadow-md border-l-4 border-purple-600 w-60">
@@ -98,7 +99,7 @@ export default function Itinerary() {
           ))}
         </div>
 
-        {/* Show More Button for remaining hotels */}
+       
         {hotels.length > 4 && (
           <div className="text-center mt-4">
             <button
@@ -110,7 +111,7 @@ export default function Itinerary() {
           </div>
         )}
 
-        {/* Dropdown or Slider for extra hotels */}
+       
         {showMoreHotels && (
           <div className="mt-4 bg-gray-200 p-4 rounded-lg">
             <h4 className="text-lg font-semibold text-gray-800 mb-2">More Hotels</h4>
@@ -127,7 +128,7 @@ export default function Itinerary() {
           </div>
         )}
 
-        {/* Itinerary Section */}
+        
         <h3 className="text-xl font-bold mt-6">Generated Itinerary</h3>
         <div className="space-y-6">
           {daywiseItinerary.length > 0 ? (
@@ -146,7 +147,7 @@ export default function Itinerary() {
           )}
         </div>
 
-        {/* Download & Generate Itinerary Buttons */}
+        
         <div className="flex flex-col gap-3 mt-6">
           {pdfPath && (
             <a
